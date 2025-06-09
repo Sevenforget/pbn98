@@ -1,0 +1,82 @@
+import Header from "@/components/header";
+import Tag from "@/components/tag";
+import { fetchPostFromApi } from "@/lib/api-service";
+import { getCurrentProjectDomain } from "@/lib/domain-mapper";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const postId = Number.parseInt(id);
+
+  if (isNaN(postId) || postId < 0) {
+    notFound();
+  }
+
+  try {
+    // 현재 프로젝트의 도메인 자동 감지
+    const communityUrl = "https://igorgriffiths.com"; // 하드코딩된 도메인 (pbn-domains.json 기반)
+
+    // API에서 게시물 데이터 가져오기
+    const post = await fetchPostFromApi(communityUrl, postId);
+
+    return (
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Header />
+
+        <article className="container mx-auto px-4 py-12">
+          <div className="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
+            <div className="p-8">
+              <Link
+                href="/"
+                className="inline-flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 mb-6 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                모든 글 보기
+              </Link>
+
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                {post.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-4 mb-8">
+                <div className="text-gray-600 dark:text-gray-300">
+                  {new Date(post.date || new Date()).toLocaleDateString(
+                    "ko-KR"
+                  )}{" "}
+                  · {post.readTime || "5분"} 읽기
+                </div>
+                <div className="text-gray-600 dark:text-gray-300">
+                  작성자: {post.author || "관리자"}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {post.tags &&
+                    post.tags.map((tag) => <Tag key={tag} name={tag} />)}
+                </div>
+              </div>
+
+              <div className="prose prose-lg dark:prose-invert max-w-none">
+                {post.content.split("\n").map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="mb-4 text-gray-700 dark:text-gray-200"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </article>
+      </main>
+    );
+  } catch (error) {
+    console.error("게시물 로드 실패:", error);
+    notFound();
+  }
+}
