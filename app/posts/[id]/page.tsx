@@ -1,7 +1,6 @@
 import Header from "@/components/header";
 import Tag from "@/components/tag";
 import { fetchPostFromApi } from "@/lib/api-service";
-import { getCurrentProjectDomain } from "@/lib/domain-mapper";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -20,7 +19,7 @@ export default async function PostPage({
 
   try {
     // 현재 프로젝트의 도메인 자동 감지
-    const communityUrl = "https://igorgriffiths.com"; // 하드코딩된 도메인 (pbn-domains.json 기반)
+    const communityUrl = "https://uspostpackage.com"; // 하드코딩된 도메인 (pbn-domains.json 기반)
 
     // API에서 게시물 데이터 가져오기
     const post = await fetchPostFromApi(communityUrl, postId);
